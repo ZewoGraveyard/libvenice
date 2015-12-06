@@ -40,7 +40,7 @@
 #include <unistd.h>
 
 #include "ip.h"
-#include "libmill.h"
+#include "libvenice.h"
 #include "utils.h"
 
 MILL_CT_ASSERT(sizeof(ipaddr) >= sizeof(struct sockaddr_in));

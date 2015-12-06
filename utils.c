@@ -28,7 +28,7 @@
 #include <sys/time.h>
 #include <time.h>
 
-#include "libmill.h"
+#include "libvenice.h"
 #include "utils.h"
 
 #if defined __APPLE__

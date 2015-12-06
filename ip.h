@@ -25,7 +25,7 @@
 #ifndef MILL_IP_INCLUDED
 #define MILL_IP_INCLUDED
 
-#include "libmill.h"
+#include "libvenice.h"
 
 int mill_ipfamily(ipaddr addr);
 int mill_iplen(ipaddr addr);

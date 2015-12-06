@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 #include "cr.h"
-#include "libmill.h"
+#include "libvenice.h"
 #include "list.h"
 #include "poller.h"
 #include "utils.h"
