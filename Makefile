@@ -44,12 +44,12 @@ ifeq ($(UNAME), Linux)
 	cp lib$(LIB_NAME).a $(TARGET)/usr/local/lib/
 	touch $(TARGET)/DEBIAN/control
 	echo "Package: $(PKG_NAME)" >> $(TARGET)/DEBIAN/control
-	echo "Version: 1.0" >> $(TARGET)/DEBIAN/control
+	echo "Version: 0.1.0" >> $(TARGET)/DEBIAN/control
 	echo "Section: custom" >> $(TARGET)/DEBIAN/control
 	echo "Priority: optional" >> $(TARGET)/DEBIAN/control
 	echo "Architecture: all" >> $(TARGET)/DEBIAN/control
 	echo "Essential: no" >> $(TARGET)/DEBIAN/control
-	echo "Installed-Size: 1024" >> $(TARGET)/DEBIAN/control
+	echo "Installed-Size: 16224" >> $(TARGET)/DEBIAN/control
 	echo "Maintainer: zewo.io" >> $(TARGET)/DEBIAN/control
 	echo "Description: $(TARGET)" >> $(TARGET)/DEBIAN/control
 	dpkg-deb --build $(TARGET)
