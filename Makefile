@@ -38,6 +38,10 @@ endif
 package:
 ifeq ($(UNAME), Linux)
 	mkdir -p $(TARGET)/DEBIAN
+	mkdir -p $(TARGET)/usr/local/lib
+	mkdir -p $(TARGET)/usr/local/include/$(TARGET)
+	cp *.h $(TARGET)/usr/local/include/$(TARGET)
+	cp lib$(LIB_NAME).a $(TARGET)/usr/local/lib/
 	touch $(TARGET)/DEBIAN/control
 	echo "Package: $(PKG_NAME)" >> $(TARGET)/DEBIAN/control
 	echo "Version: 1.0" >> $(TARGET)/DEBIAN/control
