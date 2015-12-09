@@ -9,11 +9,25 @@ libvenice
 
 ## Installation
 
+### Homebrew 
 ```bash
-$ git clone https://github.com/Zewo/libvenice.git
-$ cd libvenice
+$ brew tap zewo/tap
+$ brew install libvenice
+```
+
+### Ubuntu/Debian
+```bash
+$ git clone https://github.com/Zewo/libvenice.git && cd libvenice
 $ make
+$ make package
 $ dpkg -i libvenice.deb
+```
+
+### Source
+```bash
+$ git clone https://github.com/Zewo/libvenice.git && cd libvenice
+$ make
+$ (sudo) make install
 ```
 
 ## Community
