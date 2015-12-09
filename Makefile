@@ -2,6 +2,8 @@ TARGET = libvenice
 LIB_NAME = venice
 PKG_NAME = libvenice
 
+PREFIX ?= /usr/local
+
 UNAME := $(shell uname)
 
 .PHONY: install package
@@ -23,12 +25,15 @@ install:
 	mkdir -p $(TARGET)/usr/local/include/$(TARGET)
 	cp *.h $(TARGET)/usr/local/include/$(TARGET)
 ifeq ($(UNAME), Darwin)
+	# copy .dylib
 	cp lib$(LIB_NAME).dylib $(TARGET)/usr/local/lib/
 endif
 ifeq ($(UNAME), Linux)
+	# copy .a
 	cp lib$(LIB_NAME).a $(TARGET)/usr/local/lib/
 endif
-	cp -r $(TARGET)/usr/* /usr/
+	mkdir -p $(PREFIX)
+	cp -r $(TARGET)/usr/local/* $(PREFIX)/
 
 package:
 ifeq ($(UNAME), Linux)
