@@ -1,0 +1,351 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B01ACC801C2D72480072A3FD /* chan.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC6E1C2D72480072A3FD /* chan.c */; };
+		B01ACC811C2D72480072A3FD /* chan.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC6F1C2D72480072A3FD /* chan.h */; };
+		B01ACC821C2D72480072A3FD /* cr.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC701C2D72480072A3FD /* cr.c */; };
+		B01ACC831C2D72480072A3FD /* cr.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC711C2D72480072A3FD /* cr.h */; };
+		B01ACC841C2D72480072A3FD /* ip.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC721C2D72480072A3FD /* ip.c */; };
+		B01ACC851C2D72480072A3FD /* ip.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC731C2D72480072A3FD /* ip.h */; };
+		B01ACC861C2D72480072A3FD /* libvenice.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC741C2D72480072A3FD /* libvenice.h */; };
+		B01ACC871C2D72480072A3FD /* list.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC751C2D72480072A3FD /* list.c */; };
+		B01ACC881C2D72480072A3FD /* list.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC761C2D72480072A3FD /* list.h */; };
+		B01ACC891C2D72480072A3FD /* poller.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC771C2D72480072A3FD /* poller.c */; };
+		B01ACC8A1C2D72480072A3FD /* poller.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC781C2D72480072A3FD /* poller.h */; };
+		B01ACC8B1C2D72480072A3FD /* slist.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC791C2D72480072A3FD /* slist.c */; };
+		B01ACC8C1C2D72480072A3FD /* slist.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC7A1C2D72480072A3FD /* slist.h */; };
+		B01ACC8D1C2D72480072A3FD /* stack.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC7B1C2D72480072A3FD /* stack.c */; };
+		B01ACC8E1C2D72480072A3FD /* stack.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC7C1C2D72480072A3FD /* stack.h */; };
+		B01ACC8F1C2D72480072A3FD /* tcp.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC7D1C2D72480072A3FD /* tcp.c */; };
+		B01ACC901C2D72480072A3FD /* timer.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACC7E1C2D72480072A3FD /* timer.c */; };
+		B01ACC911C2D72480072A3FD /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACC7F1C2D72480072A3FD /* utils.h */; };
+		B01ACCDF1C2D75E00072A3FD /* debug.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACCDE1C2D75E00072A3FD /* debug.h */; };
+		B01ACCE11C2D76060072A3FD /* debug.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACCE01C2D76060072A3FD /* debug.c */; };
+		B01ACCEE1C2D89C60072A3FD /* udp.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACCEC1C2D89C60072A3FD /* udp.c */; };
+		B01ACCEF1C2D89C60072A3FD /* unix.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACCED1C2D89C60072A3FD /* unix.c */; };
+		B01ACCF11C2D8ED30072A3FD /* timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACCF01C2D8ED30072A3FD /* timer.h */; };
+		B01ACCF91C2DE6470072A3FD /* dns.c in Sources */ = {isa = PBXBuildFile; fileRef = B01ACCF71C2DE6470072A3FD /* dns.c */; };
+		B01ACCFA1C2DE6470072A3FD /* dns.h in Headers */ = {isa = PBXBuildFile; fileRef = B01ACCF81C2DE6470072A3FD /* dns.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B01ACC661C2D71F90072A3FD /* liblibvenice.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = liblibvenice.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		B01ACC6E1C2D72480072A3FD /* chan.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = chan.c; path = ../chan.c; sourceTree = "<group>"; };
+		B01ACC6F1C2D72480072A3FD /* chan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = chan.h; path = ../chan.h; sourceTree = "<group>"; };
+		B01ACC701C2D72480072A3FD /* cr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = cr.c; path = ../cr.c; sourceTree = "<group>"; };
+		B01ACC711C2D72480072A3FD /* cr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = cr.h; path = ../cr.h; sourceTree = "<group>"; };
+		B01ACC721C2D72480072A3FD /* ip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ip.c; path = ../ip.c; sourceTree = "<group>"; };
+		B01ACC731C2D72480072A3FD /* ip.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ip.h; path = ../ip.h; sourceTree = "<group>"; };
+		B01ACC741C2D72480072A3FD /* libvenice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libvenice.h; path = ../libvenice.h; sourceTree = "<group>"; };
+		B01ACC751C2D72480072A3FD /* list.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = list.c; path = ../list.c; sourceTree = "<group>"; };
+		B01ACC761C2D72480072A3FD /* list.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = list.h; path = ../list.h; sourceTree = "<group>"; };
+		B01ACC771C2D72480072A3FD /* poller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = poller.c; path = ../poller.c; sourceTree = "<group>"; };
+		B01ACC781C2D72480072A3FD /* poller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = poller.h; path = ../poller.h; sourceTree = "<group>"; };
+		B01ACC791C2D72480072A3FD /* slist.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = slist.c; path = ../slist.c; sourceTree = "<group>"; };
+		B01ACC7A1C2D72480072A3FD /* slist.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = slist.h; path = ../slist.h; sourceTree = "<group>"; };
+		B01ACC7B1C2D72480072A3FD /* stack.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = stack.c; path = ../stack.c; sourceTree = "<group>"; };
+		B01ACC7C1C2D72480072A3FD /* stack.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stack.h; path = ../stack.h; sourceTree = "<group>"; };
+		B01ACC7D1C2D72480072A3FD /* tcp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = tcp.c; path = ../tcp.c; sourceTree = "<group>"; };
+		B01ACC7E1C2D72480072A3FD /* timer.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = timer.c; path = ../timer.c; sourceTree = "<group>"; };
+		B01ACC7F1C2D72480072A3FD /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = ../utils.h; sourceTree = "<group>"; };
+		B01ACCDE1C2D75E00072A3FD /* debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = debug.h; path = ../debug.h; sourceTree = "<group>"; };
+		B01ACCE01C2D76060072A3FD /* debug.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = debug.c; path = ../debug.c; sourceTree = "<group>"; };
+		B01ACCE21C2D83960072A3FD /* epoll.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = epoll.inc; path = ../epoll.inc; sourceTree = "<group>"; };
+		B01ACCE31C2D83960072A3FD /* kqueue.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = kqueue.inc; path = ../kqueue.inc; sourceTree = "<group>"; };
+		B01ACCE41C2D83960072A3FD /* poll.inc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.pascal; name = poll.inc; path = ../poll.inc; sourceTree = "<group>"; };
+		B01ACCEC1C2D89C60072A3FD /* udp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = udp.c; path = ../udp.c; sourceTree = "<group>"; };
+		B01ACCED1C2D89C60072A3FD /* unix.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = unix.c; path = ../unix.c; sourceTree = "<group>"; };
+		B01ACCF01C2D8ED30072A3FD /* timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = timer.h; path = ../timer.h; sourceTree = "<group>"; };
+		B01ACCF71C2DE6470072A3FD /* dns.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dns.c; path = ../dns.c; sourceTree = "<group>"; };
+		B01ACCF81C2DE6470072A3FD /* dns.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dns.h; path = ../dns.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B01ACC631C2D71F90072A3FD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		B01ACC5D1C2D71F90072A3FD = {
+			isa = PBXGroup;
+			children = (
+				B01ACC6D1C2D72100072A3FD /* Sources */,
+				B01ACC671C2D71F90072A3FD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B01ACC671C2D71F90072A3FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B01ACC661C2D71F90072A3FD /* liblibvenice.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B01ACC6D1C2D72100072A3FD /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				B01ACCE21C2D83960072A3FD /* epoll.inc */,
+				B01ACCE31C2D83960072A3FD /* kqueue.inc */,
+				B01ACCE41C2D83960072A3FD /* poll.inc */,
+				B01ACCF71C2DE6470072A3FD /* dns.c */,
+				B01ACCF81C2DE6470072A3FD /* dns.h */,
+				B01ACC6E1C2D72480072A3FD /* chan.c */,
+				B01ACC6F1C2D72480072A3FD /* chan.h */,
+				B01ACC701C2D72480072A3FD /* cr.c */,
+				B01ACC711C2D72480072A3FD /* cr.h */,
+				B01ACC721C2D72480072A3FD /* ip.c */,
+				B01ACC731C2D72480072A3FD /* ip.h */,
+				B01ACC741C2D72480072A3FD /* libvenice.h */,
+				B01ACC751C2D72480072A3FD /* list.c */,
+				B01ACC761C2D72480072A3FD /* list.h */,
+				B01ACC771C2D72480072A3FD /* poller.c */,
+				B01ACC781C2D72480072A3FD /* poller.h */,
+				B01ACC791C2D72480072A3FD /* slist.c */,
+				B01ACC7A1C2D72480072A3FD /* slist.h */,
+				B01ACC7B1C2D72480072A3FD /* stack.c */,
+				B01ACC7C1C2D72480072A3FD /* stack.h */,
+				B01ACC7D1C2D72480072A3FD /* tcp.c */,
+				B01ACCEC1C2D89C60072A3FD /* udp.c */,
+				B01ACCED1C2D89C60072A3FD /* unix.c */,
+				B01ACC7E1C2D72480072A3FD /* timer.c */,
+				B01ACCF01C2D8ED30072A3FD /* timer.h */,
+				B01ACC7F1C2D72480072A3FD /* utils.h */,
+				B01ACCDE1C2D75E00072A3FD /* debug.h */,
+				B01ACCE01C2D76060072A3FD /* debug.c */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		B01ACC641C2D71F90072A3FD /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B01ACCFA1C2DE6470072A3FD /* dns.h in Headers */,
+				B01ACC911C2D72480072A3FD /* utils.h in Headers */,
+				B01ACC881C2D72480072A3FD /* list.h in Headers */,
+				B01ACCDF1C2D75E00072A3FD /* debug.h in Headers */,
+				B01ACC811C2D72480072A3FD /* chan.h in Headers */,
+				B01ACC8A1C2D72480072A3FD /* poller.h in Headers */,
+				B01ACCF11C2D8ED30072A3FD /* timer.h in Headers */,
+				B01ACC8E1C2D72480072A3FD /* stack.h in Headers */,
+				B01ACC851C2D72480072A3FD /* ip.h in Headers */,
+				B01ACC861C2D72480072A3FD /* libvenice.h in Headers */,
+				B01ACC831C2D72480072A3FD /* cr.h in Headers */,
+				B01ACC8C1C2D72480072A3FD /* slist.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		B01ACC651C2D71F90072A3FD /* libvenice */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B01ACC6A1C2D71F90072A3FD /* Build configuration list for PBXNativeTarget "libvenice" */;
+			buildPhases = (
+				B01ACC621C2D71F90072A3FD /* Sources */,
+				B01ACC631C2D71F90072A3FD /* Frameworks */,
+				B01ACC641C2D71F90072A3FD /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = libvenice;
+			productName = libvenice;
+			productReference = B01ACC661C2D71F90072A3FD /* liblibvenice.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		B01ACC5E1C2D71F90072A3FD /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = Zewo;
+				TargetAttributes = {
+					B01ACC651C2D71F90072A3FD = {
+						CreatedOnToolsVersion = 7.2;
+					};
+				};
+			};
+			buildConfigurationList = B01ACC611C2D71F90072A3FD /* Build configuration list for PBXProject "libvenice" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B01ACC5D1C2D71F90072A3FD;
+			productRefGroup = B01ACC671C2D71F90072A3FD /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B01ACC651C2D71F90072A3FD /* libvenice */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B01ACC621C2D71F90072A3FD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B01ACC841C2D72480072A3FD /* ip.c in Sources */,
+				B01ACCF91C2DE6470072A3FD /* dns.c in Sources */,
+				B01ACCEE1C2D89C60072A3FD /* udp.c in Sources */,
+				B01ACCE11C2D76060072A3FD /* debug.c in Sources */,
+				B01ACC821C2D72480072A3FD /* cr.c in Sources */,
+				B01ACC801C2D72480072A3FD /* chan.c in Sources */,
+				B01ACC901C2D72480072A3FD /* timer.c in Sources */,
+				B01ACC8B1C2D72480072A3FD /* slist.c in Sources */,
+				B01ACC8D1C2D72480072A3FD /* stack.c in Sources */,
+				B01ACCEF1C2D89C60072A3FD /* unix.c in Sources */,
+				B01ACC8F1C2D72480072A3FD /* tcp.c in Sources */,
+				B01ACC891C2D72480072A3FD /* poller.c in Sources */,
+				B01ACC871C2D72480072A3FD /* list.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		B01ACC681C2D71F90072A3FD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		B01ACC691C2D71F90072A3FD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		B01ACC6B1C2D71F90072A3FD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B01ACC6C1C2D71F90072A3FD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B01ACC611C2D71F90072A3FD /* Build configuration list for PBXProject "libvenice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B01ACC681C2D71F90072A3FD /* Debug */,
+				B01ACC691C2D71F90072A3FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B01ACC6A1C2D71F90072A3FD /* Build configuration list for PBXNativeTarget "libvenice" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B01ACC6B1C2D71F90072A3FD /* Debug */,
+				B01ACC6C1C2D71F90072A3FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B01ACC5E1C2D71F90072A3FD /* Project object */;
+}

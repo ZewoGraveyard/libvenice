@@ -27,8 +27,21 @@
 
 #include <stddef.h>
 
+#include "debug.h"
 #include "list.h"
 #include "slist.h"
+
+/* One of these structures is preallocated for every coroutine. */
+struct mill_choosedata {
+    /* List of clauses in the 'choose' statement. */
+    struct mill_slist clauses;
+    /* 1 if there is 'otherwise' clause. 0 if there is not. */
+    int othws;
+    /* 1 if there is 'deadline' clause. 0 if there is not. */
+    int ddline;
+    /* Number of clauses that are immediately available. */
+    int available;
+};
 
 /* Channel endpoint. */
 struct mill_ep {
@@ -61,6 +74,9 @@ struct mill_chan {
        the buffer used to store the message supplied by chdone() function. */
     size_t bufsz;
     size_t items;
+
+    /* Debugging info. */
+    struct mill_debug_chan debug;
 };
 
 /* This structure represents a single clause in a choose statement.

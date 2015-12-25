@@ -1,26 +1,26 @@
-    /*
+/*
 
-  Copyright (c) 2015 Martin Sustrik
+ Copyright (c) 2015 Martin Sustrik
 
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"),
-  to deal in the Software without restriction, including without limitation
-  the rights to use, copy, modify, merge, publish, distribute, sublicense,
-  and/or sell copies of the Software, and to permit persons to whom
-  the Software is furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"),
+ to deal in the Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ and/or sell copies of the Software, and to permit persons to whom
+ the Software is furnished to do so, subject to the following conditions:
 
-  The above copyright notice and this permission notice shall be included
-  in all copies or substantial portions of the Software.
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-  IN THE SOFTWARE.
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+ THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ IN THE SOFTWARE.
 
-*/
+ */
 
 #include <arpa/inet.h>
 #include <errno.h>
@@ -33,22 +33,23 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include "debug.h"
 #include "ip.h"
 #include "libvenice.h"
 #include "utils.h"
 
 /* The buffer size is based on typical Ethernet MTU (1500 bytes). Making it
-   smaller would yield small suboptimal packets. Making it higher would bring
-   no substantial benefit. The value is made smaller to account for IPv4/IPv6
-   and TCP headers. Few more bytes are subtracted to account for any possible
-   IP or TCP options */
+ smaller would yield small suboptimal packets. Making it higher would bring
+ no substantial benefit. The value is made smaller to account for IPv4/IPv6
+ and TCP headers. Few more bytes are subtracted to account for any possible
+ IP or TCP options */
 #ifndef MILL_TCP_BUFLEN
 #define MILL_TCP_BUFLEN (1500 - 68)
 #endif
 
 enum mill_tcptype {
-   MILL_TCPLISTENER,
-   MILL_TCPCONN
+    MILL_TCPLISTENER,
+    MILL_TCPCONN
 };
 
 struct mill_tcpsock {
@@ -69,6 +70,7 @@ struct mill_tcpconn {
     size_t olen;
     char ibuf[MILL_TCP_BUFLEN];
     char obuf[MILL_TCP_BUFLEN];
+    ipaddr addr;
 };
 
 static void mill_tcptune(int s) {
@@ -83,7 +85,7 @@ static void mill_tcptune(int s) {
     rc = setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof (opt));
     mill_assert(rc == 0);
     /* If possible, prevent SIGPIPE signal when writing to the connection
-        already closed by the peer. */
+     already closed by the peer. */
 #ifdef SO_NOSIGPIPE
     opt = 1;
     rc = setsockopt (s, SOL_SOCKET, SO_NOSIGPIPE, &opt, sizeof (opt));
@@ -115,7 +117,7 @@ tcpsock tcplisten(ipaddr addr, int backlog) {
         return NULL;
 
     /* If the user requested an ephemeral port,
-       retrieve the port number assigned by the OS now. */
+     retrieve the port number assigned by the OS now. */
     int port = mill_ipport(addr);
     if(!port == 0) {
         ipaddr baddr;
@@ -123,6 +125,7 @@ tcpsock tcplisten(ipaddr addr, int backlog) {
         rc = getsockname(s, (struct sockaddr*)&baddr, &len);
         if(rc == -1) {
             int err = errno;
+            fdclean(s);
             close(s);
             errno = err;
             return NULL;
@@ -133,6 +136,7 @@ tcpsock tcplisten(ipaddr addr, int backlog) {
     /* Create the object. */
     struct mill_tcplistener *l = malloc(sizeof(struct mill_tcplistener));
     if(!l) {
+        fdclean(s);
         close(s);
         errno = ENOMEM;
         return NULL;
@@ -145,28 +149,38 @@ tcpsock tcplisten(ipaddr addr, int backlog) {
 }
 
 int tcpport(tcpsock s) {
-    if(s->type != MILL_TCPLISTENER)
-        mill_panic("trying to get port from a socket that isn't listening");
-    struct mill_tcplistener *l = (struct mill_tcplistener*)s;
-    return l->port;
+    if(s->type == MILL_TCPCONN) {
+        struct mill_tcpconn *c = (struct mill_tcpconn*)s;
+        return mill_ipport(c->addr);
+    }
+    else if(s->type == MILL_TCPLISTENER) {
+        struct mill_tcplistener *l = (struct mill_tcplistener*)s;
+        return l->port;
+    }
+    mill_assert(0);
 }
 
 tcpsock tcpaccept(tcpsock s, int64_t deadline) {
     if(s->type != MILL_TCPLISTENER)
         mill_panic("trying to accept on a socket that isn't listening");
     struct mill_tcplistener *l = (struct mill_tcplistener*)s;
+    socklen_t addrlen;
+    ipaddr addr;
     while(1) {
         /* Try to get new connection (non-blocking). */
-        int as = accept(l->fd, NULL, NULL);
+        addrlen = sizeof(addr);
+        int as = accept(l->fd, (struct sockaddr *)&addr, &addrlen);
         if (as >= 0) {
             mill_tcptune(as);
             struct mill_tcpconn *conn = malloc(sizeof(struct mill_tcpconn));
             if(!conn) {
+                fdclean(as);
                 close(as);
                 errno = ENOMEM;
                 return NULL;
             }
             tcpconn_init(conn, as);
+            conn->addr = addr;
             errno = 0;
             return (tcpsock)conn;
         }
@@ -174,7 +188,7 @@ tcpsock tcpaccept(tcpsock s, int64_t deadline) {
         if(errno != EAGAIN && errno != EWOULDBLOCK)
             return NULL;
         /* Wait till new connection is available. */
-        int rc = mill_fdwait(l->fd, FDW_IN, deadline);
+        int rc = fdwait(l->fd, FDW_IN, deadline);
         if(rc == 0) {
             errno = ETIMEDOUT;
             return NULL;
@@ -196,7 +210,7 @@ tcpsock tcpconnect(ipaddr addr, int64_t deadline) {
         mill_assert(rc == -1);
         if(errno != EINPROGRESS)
             return NULL;
-        rc = mill_fdwait(s, FDW_OUT, deadline);
+        rc = fdwait(s, FDW_OUT, deadline);
         if(rc == 0) {
             errno = ETIMEDOUT;
             return NULL;
@@ -206,11 +220,13 @@ tcpsock tcpconnect(ipaddr addr, int64_t deadline) {
         rc = getsockopt(s, SOL_SOCKET, SO_ERROR, (void*)&err, &errsz);
         if(rc != 0) {
             err = errno;
+            fdclean(s);
             close(s);
             errno = err;
             return NULL;
         }
         if(err != 0) {
+            fdclean(s);
             close(s);
             errno = err;
             return NULL;
@@ -220,6 +236,7 @@ tcpsock tcpconnect(ipaddr addr, int64_t deadline) {
     /* Create the object. */
     struct mill_tcpconn *conn = malloc(sizeof(struct mill_tcpconn));
     if(!conn) {
+        fdclean(s);
         close(s);
         errno = ENOMEM;
         return NULL;
@@ -256,7 +273,7 @@ size_t tcpsend(tcpsock s, const void *buf, size_t len, int64_t deadline) {
     }
 
     /* The data chunk to send is longer than the output buffer.
-       Let's do the sending in-place. */
+     Let's do the sending in-place. */
     char *pos = (char*)buf;
     size_t remaining = len;
     while(remaining) {
@@ -264,7 +281,7 @@ size_t tcpsend(tcpsock s, const void *buf, size_t len, int64_t deadline) {
         if(sz == -1) {
             if(errno != EAGAIN && errno != EWOULDBLOCK)
                 return 0;
-            int rc = mill_fdwait(conn->fd, FDW_OUT, deadline);
+            int rc = fdwait(conn->fd, FDW_OUT, deadline);
             if(rc == 0) {
                 errno = ETIMEDOUT;
                 return len - remaining;
@@ -293,7 +310,7 @@ void tcpflush(tcpsock s, int64_t deadline) {
         if(sz == -1) {
             if(errno != EAGAIN && errno != EWOULDBLOCK)
                 return;
-            int rc = mill_fdwait(conn->fd, FDW_OUT, deadline);
+            int rc = fdwait(conn->fd, FDW_OUT, deadline);
             if(rc == 0) {
                 errno = ETIMEDOUT;
                 return;
@@ -334,11 +351,11 @@ size_t tcprecv(tcpsock s, void *buf, size_t len, int64_t deadline) {
     while(1) {
         if(remaining > MILL_TCP_BUFLEN) {
             /* If we still have a lot to read try to read it in one go directly
-               into the destination buffer. */
+             into the destination buffer. */
             ssize_t sz = recv(conn->fd, pos, remaining, 0);
             if(!sz) {
-		        errno = ECONNRESET;
-		        return len - remaining;
+                errno = ECONNRESET;
+                return len - remaining;
             }
             if(sz == -1) {
                 if(errno != EAGAIN && errno != EWOULDBLOCK)
@@ -354,11 +371,11 @@ size_t tcprecv(tcpsock s, void *buf, size_t len, int64_t deadline) {
         }
         else {
             /* If we have just a little to read try to read the full connection
-               buffer to minimise the number of system calls. */
+             buffer to minimise the number of system calls. */
             ssize_t sz = recv(conn->fd, conn->ibuf, MILL_TCP_BUFLEN, 0);
             if(!sz) {
-		        errno = ECONNRESET;
-		        return len - remaining;
+                errno = ECONNRESET;
+                return len - remaining;
             }
             if(sz == -1) {
                 if(errno != EAGAIN && errno != EWOULDBLOCK)
@@ -382,7 +399,7 @@ size_t tcprecv(tcpsock s, void *buf, size_t len, int64_t deadline) {
         }
 
         /* Wait till there's more data to read. */
-        int res = mill_fdwait(conn->fd, FDW_IN, deadline);
+        int res = fdwait(conn->fd, FDW_IN, deadline);
         if(!res) {
             errno = ETIMEDOUT;
             return len - remaining;
@@ -486,7 +503,7 @@ size_t tcprecvlh(tcpsock s, void *buf, size_t lowwater, size_t highwater, int64_
         }
 
         /* Wait till there's more data to read. */
-        int res = mill_fdwait(conn->fd, FDW_IN, deadline);
+        int res = fdwait(conn->fd, FDW_IN, deadline);
         if(!res) {
             errno = ETIMEDOUT;
             return received;
@@ -495,7 +512,7 @@ size_t tcprecvlh(tcpsock s, void *buf, size_t lowwater, size_t highwater, int64_
 }
 
 size_t tcprecvuntil(tcpsock s, void *buf, size_t len,
-      const char *delims, size_t delimcount, int64_t deadline) {
+                    const char *delims, size_t delimcount, int64_t deadline) {
     if(s->type != MILL_TCPCONN)
         mill_panic("trying to receive from an unconnected socket");
     char *pos = (char*)buf;
@@ -518,6 +535,7 @@ size_t tcprecvuntil(tcpsock s, void *buf, size_t len,
 void tcpclose(tcpsock s) {
     if(s->type == MILL_TCPLISTENER) {
         struct mill_tcplistener *l = (struct mill_tcplistener*)s;
+        fdclean(l->fd);
         int rc = close(l->fd);
         mill_assert(rc == 0);
         free(l);
@@ -525,6 +543,7 @@ void tcpclose(tcpsock s) {
     }
     if(s->type == MILL_TCPCONN) {
         struct mill_tcpconn *c = (struct mill_tcpconn*)s;
+        fdclean(c->fd);
         int rc = close(c->fd);
         mill_assert(rc == 0);
         free(c);
@@ -575,5 +594,12 @@ int tcpdetach(tcpsock s) {
         return fd;
     }
     mill_assert(0);
+}
+
+ipaddr tcpaddr(tcpsock s) {
+    if(s->type != MILL_TCPCONN)
+        mill_panic("trying to get address from a socket that isn't connected");
+    struct mill_tcpconn *l = (struct mill_tcpconn *)s;
+    return l->addr;
 }
 

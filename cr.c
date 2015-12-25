@@ -22,10 +22,12 @@
 
 */
 
+#include <errno.h>
 #include <stddef.h>
 #include <stdio.h>
 
 #include "cr.h"
+#include "debug.h"
 #include "libvenice.h"
 #include "poller.h"
 #include "stack.h"
@@ -40,9 +42,13 @@ struct mill_cr *mill_running = &mill_main;
 /* Queue of coroutines scheduled for execution. */
 static struct mill_slist mill_ready = {0};
 
-int goprepare(int count, size_t stack_size, size_t val_size) {
+void goprepare(int count, size_t stack_size) {
+    if(mill_slow(mill_hascrs())) {errno = EAGAIN; return;}
+    /* Allocate any resources needed by the polling mechanism. */
+    mill_poller_init();
+    if(mill_slow(errno != 0)) return;
     /* Allocate the stacks. */
-    return mill_preparestacks(count, stack_size + sizeof(struct mill_cr));
+    mill_preparestacks(count, stack_size + sizeof(struct mill_cr));
 }
 
 int mill_suspend(void) {
@@ -62,7 +68,7 @@ int mill_suspend(void) {
         if(!mill_slist_empty(&mill_ready)) {
             ++counter;
             struct mill_slist_item *it = mill_slist_pop(&mill_ready);
-            mill_running = mill_cont(it, struct mill_cr, u_ready.item);
+            mill_running = mill_cont(it, struct mill_cr, ready);
             mill_jmp(&mill_running->ctx);
         }
         /*  Otherwise, we are going to wait for sleeping coroutines
@@ -76,14 +82,19 @@ int mill_suspend(void) {
 void mill_resume(struct mill_cr *cr, int result) {
     cr->result = result;
     cr->state = MILL_READY;
-    mill_slist_push_back(&mill_ready, &cr->u_ready.item);
+    mill_slist_push_back(&mill_ready, &cr->ready);
 }
 
 /* The intial part of go(). Starts the new coroutine.
    Returns the pointer to the top of its stack. */
-void *mill_go_prologue() {
+void *mill_go_prologue(const char *created) {
+    /* Ensure that debug functions are available whenever a single go()
+     statement is present in the user's code. */
+    mill_preserve_debug();
     /* Allocate and initialise new stack. */
     struct mill_cr *cr = ((struct mill_cr*)mill_allocstack()) - 1;
+    mill_register_cr(&cr->debug, created);
+    mill_trace(created, "{%d}=go()", (int)cr->debug.id);
     /* Suspend the parent coroutine and make the new one running. */
     if(mill_setjmp(&mill_running->ctx))
         return NULL;
@@ -94,6 +105,8 @@ void *mill_go_prologue() {
 
 /* The final part of go(). Cleans up after the coroutine is finished. */
 void mill_go_epilogue(void) {
+    mill_trace(NULL, "go() done");
+    mill_unregister_cr(&mill_running->debug);
     mill_freestack(mill_running + 1);
     mill_running = NULL;
     /* Given that there's no running coroutine at this point
@@ -101,15 +114,17 @@ void mill_go_epilogue(void) {
     mill_suspend();
 }
 
-void mill_yield() {
+void mill_yield(const char *current) {
+    mill_trace(current, "yield()");
+    mill_set_current(&mill_running->debug, current);
     /* This looks fishy, but yes, we can resume the coroutine even before
        suspending it. */
     mill_resume(mill_running, 0);
     mill_suspend();
 }
 
-void co(void* ctx, void (*routine)(void*)) {
-    void *mill_sp = mill_go_prologue();
+void co(void* ctx, void (*routine)(void*), const char *created) {
+    void *mill_sp = mill_go_prologue(created);
     if(mill_sp) {
         int mill_anchor[mill_unoptimisable1];
         mill_unoptimisable2 = &mill_anchor;
@@ -122,8 +137,4 @@ void co(void* ctx, void (*routine)(void*)) {
 
 size_t mill_clauselen() {
     return MILL_CLAUSELEN;
-}
-
-pid_t mill_fork() {
-    return fork();
 }

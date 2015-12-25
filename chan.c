@@ -30,6 +30,7 @@
 
 #include "chan.h"
 #include "cr.h"
+#include "debug.h"
 #include "libvenice.h"
 #include "utils.h"
 
@@ -43,16 +44,19 @@ struct mill_chan *mill_getchan(struct mill_ep *ep) {
         return mill_cont(ep, struct mill_chan, sender);
     case MILL_RECEIVER:
         return mill_cont(ep, struct mill_chan, receiver);
+    default:
+        assert(0);
     }
 }
 
-chan mill_chmake(size_t bufsz) {
-    /* We are allocating 1 additional element after the channel buffer to
-       store the done-with value. It can't be stored in the regular buffer
-       because that would mean chdone() would block when buffer is full. */
+chan mill_chmake(size_t bufsz, const char *created) {
+    /* If there's at least one channel created in the user's code
+     we want the debug functions to get into the binary. */
+    mill_preserve_debug();
     struct mill_chan *ch = (struct mill_chan*) malloc(sizeof(struct mill_chan));
     if(!ch)
         return NULL;
+    mill_register_chan(&ch->debug, created);
     ch->sender.type = MILL_SENDER;
     ch->sender.seqnum = mill_choose_seqnum;
     mill_list_init(&ch->sender.clauses);
@@ -62,51 +66,63 @@ chan mill_chmake(size_t bufsz) {
     ch->done = 0;
     ch->bufsz = bufsz;
     ch->items = 0;
+    mill_trace(created, "<%d>=chmake(%d)", (int)ch->debug.id, (int)bufsz);
     return ch;
 }
 
-void mill_chclose(chan ch) {
+void mill_chclose(chan ch, const char *current) {
+    if(mill_slow(!ch))
+        mill_panic("null channel used");
+    mill_trace(current, "chclose(<%d>)", (int)ch->debug.id);
     if(!mill_list_empty(&ch->sender.clauses) ||
-          !mill_list_empty(&ch->receiver.clauses))
+       !mill_list_empty(&ch->receiver.clauses))
         mill_panic("attempt to close a channel while it is still being used");
+    mill_unregister_chan(&ch->debug);
     free(ch);
 }
 
 /* Unblock a coroutine blocked in mill_choose_wait() function.
-   It also cleans up the associated clause list. */
+ It also cleans up the associated clause list. */
 static void mill_choose_unblock(struct mill_clause *cl) {
     struct mill_slist_item *it;
     struct mill_clause *itcl;
-    for(it = mill_slist_begin(&cl->cr->u_choose.clauses);
-          it; it = mill_slist_next(it)) {
+    for(it = mill_slist_begin(&cl->cr->choosedata.clauses);
+        it; it = mill_slist_next(it)) {
         itcl = mill_cont(it, struct mill_clause, chitem);
         if(!itcl->used)
             continue;
         mill_list_erase(&itcl->ep->clauses, &itcl->epitem);
     }
+    if(cl->cr->choosedata.ddline)
+        mill_timer_rm(&cl->cr->timer);
     mill_resume(cl->cr, cl->idx);
 }
 
-static void mill_choose_init_() {
-    mill_slist_init(&mill_running->u_choose.clauses);
-    mill_running->u_choose.othws = 0;
-    mill_running->u_choose.available = 0;
+static void mill_choose_init_(const char *current) {
+    mill_set_current(&mill_running->debug, current);
+    mill_slist_init(&mill_running->choosedata.clauses);
+    mill_running->choosedata.othws = 0;
+    mill_running->choosedata.ddline = 0;
+    mill_running->choosedata.available = 0;
     ++mill_choose_seqnum;
 }
 
-void mill_choose_init() {
+void mill_choose_init(const char *current) {
+    mill_trace(current, "choose()");
     mill_running->state = MILL_CHOOSE;
-    mill_choose_init_();
+    mill_choose_init_(current);
 }
 
 void mill_choose_in(void *clause, chan ch, int idx) {
+    if(mill_slow(!ch))
+        mill_panic("null channel used");
     /* Find out whether the clause is immediately available. */
     int available = ch->done || !mill_list_empty(&ch->sender.clauses) ||
         ch->items ? 1 : 0;
     if(available)
-        ++mill_running->u_choose.available;
+        ++mill_running->choosedata.available;
     /* If there are available clauses don't bother with non-available ones. */
-    if(!available && mill_running->u_choose.available)
+    if(!available && mill_running->choosedata.available)
         return;
     /* Fill in the clause entry. */
     struct mill_clause *cl = (struct mill_clause*) clause;
@@ -115,7 +131,7 @@ void mill_choose_in(void *clause, chan ch, int idx) {
     cl->idx = idx;
     cl->available = available;
     cl->used = 1;
-    mill_slist_push_back(&mill_running->u_choose.clauses, &cl->chitem);
+    mill_slist_push_back(&mill_running->choosedata.clauses, &cl->chitem);
     if(cl->ep->seqnum == mill_choose_seqnum) {
         ++cl->ep->refs;
         return;
@@ -126,13 +142,17 @@ void mill_choose_in(void *clause, chan ch, int idx) {
 }
 
 void mill_choose_out(void *clause, chan ch, int idx) {
+    if(mill_slow(!ch))
+        mill_panic("null channel used");
+    if(mill_slow(ch->done))
+        mill_panic("send to done-with channel");
     /* Find out whether the clause is immediately available. */
     int available = !mill_list_empty(&ch->receiver.clauses) ||
         ch->items < ch->bufsz ? 1 : 0;
     if(available)
-        ++mill_running->u_choose.available;
+        ++mill_running->choosedata.available;
     /* If there are available clauses don't bother with non-available ones. */
-    if(!available && mill_running->u_choose.available)
+    if(!available && mill_running->choosedata.available)
         return;
     /* Fill in the clause entry. */
     struct mill_clause *cl = (struct mill_clause*) clause;
@@ -141,7 +161,7 @@ void mill_choose_out(void *clause, chan ch, int idx) {
     cl->available = available;
     cl->idx = idx;
     cl->used = 1;
-    mill_slist_push_back(&mill_running->u_choose.clauses, &cl->chitem);
+    mill_slist_push_back(&mill_running->choosedata.clauses, &cl->chitem);
     if(cl->ep->seqnum == mill_choose_seqnum) {
         ++cl->ep->refs;
         return;
@@ -151,19 +171,47 @@ void mill_choose_out(void *clause, chan ch, int idx) {
     cl->ep->tmp = -1;
 }
 
+static void mill_choose_callback(struct mill_timer *timer) {
+    struct mill_cr *cr = mill_cont(timer, struct mill_cr, timer);
+    struct mill_slist_item *it;
+    for(it = mill_slist_begin(&cr->choosedata.clauses);
+        it; it = mill_slist_next(it)) {
+        struct mill_clause *itcl = mill_cont(it, struct mill_clause, chitem);
+        mill_assert(itcl->used);
+        mill_list_erase(&itcl->ep->clauses, &itcl->epitem);
+    }
+    mill_resume(cr, -1);
+}
+
+void mill_choose_deadline(int64_t ddline) {
+    if(mill_slow(mill_running->choosedata.othws ||
+                 mill_running->choosedata.ddline))
+        mill_panic(
+                   "multiple 'otherwise' or 'deadline' clauses in a choose statement");
+    /* Infinite deadline clause can never fire so we can as well ignore it. */
+    if(ddline < 0)
+        return;
+    mill_timer_add(&mill_running->timer, ddline, mill_choose_callback);
+    mill_running->choosedata.ddline = 1;
+}
+
 void mill_choose_otherwise(void) {
-    mill_running->u_choose.othws = 1;
+    if(mill_slow(mill_running->choosedata.othws ||
+                 mill_running->choosedata.ddline))
+        mill_panic(
+                   "multiple 'otherwise' or 'deadline' clauses in a choose statement");
+    mill_running->choosedata.othws = 1;
 }
 
 /* Push new item to the channel. */
 static void mill_enqueue(chan ch) {
     /* If there's a receiver already waiting, let's resume it. */
     if(!mill_list_empty(&ch->receiver.clauses)) {
+        mill_assert(ch->items == 0);
         struct mill_clause *cl = mill_cont(mill_list_begin(&ch->receiver.clauses), struct mill_clause, epitem);
         mill_choose_unblock(cl);
         return;
     }
-    /* Write the value to the buffer. */
     assert(ch->items < ch->bufsz);
     ++ch->items;
 }
@@ -194,15 +242,15 @@ static void mill_dequeue(chan ch) {
 }
 
 int mill_choose_wait(void) {
-    struct mill_choose *uc = &mill_running->u_choose;
+    struct mill_choosedata *cd = &mill_running->choosedata;
     struct mill_slist_item *it;
     struct mill_clause *cl = NULL;
 
     /* If there are clauses that are immediately available
        randomly choose one of them. */
-    if(uc->available > 0) {
-        int chosen = uc->available == 1 ? 0 : (int)(random() % (uc->available));
-        for(it = mill_slist_begin(&uc->clauses); it; it = mill_slist_next(it)) {
+    if(cd->available > 0) {
+        int chosen = cd->available == 1 ? 0 : (int)(random() % (cd->available));
+        for(it = mill_slist_begin(&cd->clauses); it; it = mill_slist_next(it)) {
             cl = mill_cont(it, struct mill_clause, chitem);
             if(!cl->available)
                 continue;
@@ -220,14 +268,14 @@ int mill_choose_wait(void) {
     }
 
     /* If not so but there's an 'otherwise' clause we can go straight to it. */
-    if(uc->othws) {
+    if(cd->othws) {
         mill_resume(mill_running, -1);
         return mill_suspend();
     }
 
     /* In all other cases register this coroutine with the queried channels
        and wait till one of the clauses unblocks. */
-    for(it = mill_slist_begin(&uc->clauses); it; it = mill_slist_next(it)) {
+    for(it = mill_slist_begin(&cd->clauses); it; it = mill_slist_next(it)) {
         cl = mill_cont(it, struct mill_clause, chitem);
         if(mill_slow(cl->ep->refs > 1)) {
             if(cl->ep->tmp == -1)
@@ -247,23 +295,37 @@ int mill_choose_wait(void) {
     return mill_suspend();
 }
 
-void mill_chs(chan ch) {
-    mill_choose_init_();
+void mill_chs(chan ch, const char *current) {
+    if(mill_slow(!ch))
+        mill_panic("null channel used");
+    mill_trace(current, "chs(<%d>)", (int)ch->debug.id);
+    mill_choose_init_(current);
     mill_running->state = MILL_CHS;
     struct mill_clause cl;
     mill_choose_out(&cl, ch, 0);
     mill_choose_wait();
 }
 
-void mill_chr(chan ch) {
+void mill_chr(chan ch, const char *current) {
+    if(mill_slow(!ch))
+        mill_panic("null channel used");
+    mill_trace(current, "chr(<%d>)", (int)ch->debug.id);
     mill_running->state = MILL_CHR;
-    mill_choose_init_();
+    mill_choose_init_(current);
     struct mill_clause cl;
     mill_choose_in(&cl, ch, 0);
     mill_choose_wait();
 }
 
-void mill_chdone(chan ch) {
+void mill_chdone(chan ch, const char *current) {
+    if(mill_slow(!ch))
+        mill_panic("null channel used");
+    mill_trace(current, "chdone(<%d>)", (int)ch->debug.id);
+    if(mill_slow(ch->done))
+        mill_panic("chdone on already done-with channel");
+    /* Panic if there are other senders on the same channel. */
+    if(mill_slow(!mill_list_empty(&ch->sender.clauses)))
+        mill_panic("send to done-with channel");
     /* Put the channel into done-with mode. */
     ch->done = 1;
     /* Resume all the receivers currently waiting on the channel. */

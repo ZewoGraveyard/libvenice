@@ -22,18 +22,40 @@
 
  */
 
-#ifndef MILL_POLLER_INCLUDED
-#define MILL_POLLER_INCLUDED
+#ifndef MILL_TIMER_INCLUDED
+#define MILL_TIMER_INCLUDED
 
-void mill_poller_init(void);
+#include <stdint.h>
 
-/* poller.c also implements mill_wait() and mill_fdwait() declared
- in libmill.h. */
+#include "list.h"
 
-/* Wait till at least one coroutine is resumed. If block is set to 0 the
- function will poll for events and return immediately. If it is set to 1
- it will block until there's at least one event to process. */
-void mill_wait(int block);
+struct mill_timer;
+
+typedef void (*mill_timer_callback)(struct mill_timer *timer);
+
+struct mill_timer {
+    /* Item in the global list of all timers. */
+    struct mill_list_item item;
+    /* The deadline when the timer expires. */
+    int64_t expiry;
+    /* Callback invoked when timer expires. Pfui Teufel! */
+    mill_timer_callback callback;
+};
+
+/* Add a timer for the running coroutine. */
+void mill_timer_add(struct mill_timer *timer, int64_t deadline,
+                    mill_timer_callback callback);
+
+/* Remove the timer associated with the running coroutine. */
+void mill_timer_rm(struct mill_timer *timer);
+
+/* Number of milliseconds till the next timer expires.
+ If there are no timers returns -1. */
+int mill_timer_next(void);
+
+/* Resumes all coroutines whose timers have already expired.
+ Returns zero if no coroutine was resumed, 1 otherwise. */
+int mill_timer_fire(void);
 
 #endif
 

@@ -27,8 +27,11 @@
 
 #include <stdint.h>
 
+#include "chan.h"
+#include "debug.h"
 #include "list.h"
 #include "slist.h"
+#include "timer.h"
 #include "utils.h"
 
 enum mill_state {
@@ -38,28 +41,6 @@ enum mill_state {
     MILL_CHR,
     MILL_CHS,
     MILL_CHOOSE
-};
-
-struct mill_ready {
-    struct mill_slist_item item;
-};
-
-/* This structure covers fdwait and msleep operations. */
-struct mill_fdwait {
-    /* Item in the global list of timers. */
-    struct mill_list_item item;
-    /* The timepoint when the timer expires. */
-    int64_t expiry;
-};
-
-/* This structure covers chr, chs and choose operations. */
-struct mill_choose {
-    /* List of clauses in the 'choose' statement. */
-    struct mill_slist clauses;
-    /* 1 if there is 'otherwise' clause. 0 if there is not. */
-    int othws;
-    /* Number of clauses that are immediately available. */
-    int available;
 };
 
 /* The coroutine. The memory layout looks like this:
@@ -76,9 +57,16 @@ struct mill_cr {
     /* Status of the coroutine. Used for debugging purposes. */
     enum mill_state state;
 
-    struct mill_ready u_ready;
-    struct mill_fdwait u_fdwait;
-    struct mill_choose u_choose;
+    /* The coroutine is stored in this list if it is not blocked and it is
+     waiting to be executed. */
+    struct mill_slist_item ready;
+
+    /* If the coroutine is waiting for a deadline, it uses this timer. */
+    struct mill_timer timer;
+
+    /* This structure is used when the coroutine is executing a choose
+     statement. */
+    struct mill_choosedata choosedata;
 
     /* Stored coroutine context while it is not executing. */
     struct mill_ctx ctx;
@@ -86,6 +74,8 @@ struct mill_cr {
     /* Argument to resume() call being passed to the blocked suspend() call. */
     int result;
 
+    /* Debugging info. */
+    struct mill_debug_cr debug;
 };
 
 /* Fake coroutine corresponding to the main thread of execution. */
