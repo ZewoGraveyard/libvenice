@@ -111,6 +111,8 @@ MILL_EXPORT void fdclean(int fd);
 
 MILL_EXPORT int mill_fdwait(int fd, int events, int64_t deadline, const char *current);
 
+MILL_EXPORT pid_t mfork(void);
+
 /******************************************************************************/
 /*  Channels                                                                  */
 /******************************************************************************/
@@ -142,11 +144,13 @@ MILL_EXPORT void mill_panic(const char *text);
 #define IPADDR_IPV6 2
 #define IPADDR_PREF_IPV4 3
 #define IPADDR_PREF_IPV6 4
+#define IPADDR_MAXSTRLEN 46
 
 typedef struct {char data[32];} ipaddr;
 
 MILL_EXPORT ipaddr iplocal(const char *name, int port, int mode);
 MILL_EXPORT ipaddr ipremote(const char *name, int port, int mode, int64_t deadline);
+MILL_EXPORT const char *ipaddrstr(ipaddr addr, char *ipstr);
 
 /******************************************************************************/
 /*  TCP library                                                               */
@@ -157,6 +161,7 @@ typedef struct mill_tcpsock *tcpsock;
 MILL_EXPORT tcpsock tcplisten(ipaddr addr, int backlog);
 MILL_EXPORT int tcpport(tcpsock s);
 MILL_EXPORT tcpsock tcpaccept(tcpsock s, int64_t deadline);
+MILL_EXPORT ipaddr tcpaddr(tcpsock s);
 MILL_EXPORT tcpsock tcpconnect(ipaddr addr, int64_t deadline);
 MILL_EXPORT size_t tcpsend(tcpsock s, const void *buf, size_t len, int64_t deadline);
 MILL_EXPORT void tcpflush(tcpsock s, int64_t deadline);
