@@ -17,10 +17,9 @@ $ brew install libvenice
 
 ### Ubuntu/Debian
 ```bash
-$ git clone https://github.com/Zewo/libvenice.git && cd libvenice
-$ make
-$ make package
-$ dpkg -i libvenice.deb
+$ echo "deb [trusted=yes] http://apt.zewo.io/deb ./" | sudo tee --append /etc/apt/sources.list
+$ sudo apt-get update
+$ sudo apt-get install libvenice
 ```
 
 ### Source

@@ -1,6 +1,7 @@
 TARGET = libvenice
 LIB_NAME = venice
 PKG_NAME = libvenice
+PKG_VERSION = 0.1.1
 
 PREFIX ?= /usr/local
 
@@ -44,7 +45,7 @@ ifeq ($(UNAME), Linux)
 	cp lib$(LIB_NAME).a $(TARGET)/usr/local/lib/
 	touch $(TARGET)/DEBIAN/control
 	echo "Package: $(PKG_NAME)" >> $(TARGET)/DEBIAN/control
-	echo "Version: 0.1.0" >> $(TARGET)/DEBIAN/control
+	echo "Version: $(PKG_VERSION)" >> $(TARGET)/DEBIAN/control
 	echo "Section: custom" >> $(TARGET)/DEBIAN/control
 	echo "Priority: optional" >> $(TARGET)/DEBIAN/control
 	echo "Architecture: all" >> $(TARGET)/DEBIAN/control
