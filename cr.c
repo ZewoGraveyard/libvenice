@@ -138,3 +138,7 @@ void co(void* ctx, void (*routine)(void*), const char *created) {
 size_t mill_clauselen() {
     return MILL_CLAUSELEN;
 }
+
+int mill_number_of_cores(void) {
+    return (int) sysconf(_SC_NPROCESSORS_ONLN);
+}

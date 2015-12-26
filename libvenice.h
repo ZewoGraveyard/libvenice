@@ -112,6 +112,7 @@ MILL_EXPORT void fdclean(int fd);
 MILL_EXPORT int mill_fdwait(int fd, int events, int64_t deadline, const char *current);
 
 MILL_EXPORT pid_t mfork(void);
+MILL_EXPORT int mill_number_of_cores(void);
 
 /******************************************************************************/
 /*  Channels                                                                  */
