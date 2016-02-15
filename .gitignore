@@ -11,6 +11,8 @@ build/
 DerivedData
 Carthage/
 Packages/
+libvenice/
+libvenice.dylib
 
 ## Various settings
 *.pbxuser
