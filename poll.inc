@@ -60,6 +60,7 @@ void mill_poller_init(void) {
 }
 
 pid_t mill_fork(void) {
+    return 0;
 }
 
 static void mill_poller_add(int fd, int events) {

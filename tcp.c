@@ -93,6 +93,18 @@ static void mill_tcptune(int s) {
 #endif
 }
 
+static int mill_tcpreuseport(int s) {
+#ifdef SO_REUSEPORT
+    printf("we have reuseport");
+    /*  Allow multiple processes to bind to the same port. */
+    int opt = 1;
+    return setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof (opt));
+#else
+    errno = ENOPROTOOPT;
+    return -1;
+#endif
+}
+
 static void tcpconn_init(struct mill_tcpconn *conn, int fd) {
     conn->sock.type = MILL_TCPCONN;
     conn->fd = fd;
@@ -101,15 +113,27 @@ static void tcpconn_init(struct mill_tcpconn *conn, int fd) {
     conn->olen = 0;
 }
 
-tcpsock tcplisten(ipaddr addr, int backlog) {
+tcpsock tcplisten(ipaddr addr, int backlog, int reuseport) {
     /* Open the listening socket. */
     int s = socket(mill_ipfamily(addr), SOCK_STREAM, 0);
     if(s == -1)
         return NULL;
     mill_tcptune(s);
 
+    int rc;
+
+    printf("%i\n", reuseport);
+
+    if(reuseport) {
+        printf("reuseport\n");
+        rc = mill_tcpreuseport(s);
+        printf("rc %i\n", rc);
+        if(rc != 0)
+            return NULL;
+    }
+
     /* Start listening. */
-    int rc = bind(s, (struct sockaddr*)&addr, mill_iplen(addr));
+    rc = bind(s, (struct sockaddr*)&addr, mill_iplen(addr));
     if(rc != 0)
         return NULL;
     rc = listen(s, backlog);
@@ -602,4 +626,3 @@ ipaddr tcpaddr(tcpsock s) {
     struct mill_tcpconn *l = (struct mill_tcpconn *)s;
     return l->addr;
 }
-

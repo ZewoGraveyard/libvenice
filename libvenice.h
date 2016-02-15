@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 /******************************************************************************/
 /*  ABI versioning support                                                    */
@@ -159,7 +160,7 @@ MILL_EXPORT const char *ipaddrstr(ipaddr addr, char *ipstr);
 
 typedef struct mill_tcpsock *tcpsock;
 
-MILL_EXPORT tcpsock tcplisten(ipaddr addr, int backlog);
+MILL_EXPORT tcpsock tcplisten(ipaddr addr, int backlog, int reuseport);
 MILL_EXPORT int tcpport(tcpsock s);
 MILL_EXPORT tcpsock tcpaccept(tcpsock s, int64_t deadline);
 MILL_EXPORT ipaddr tcpaddr(tcpsock s);
@@ -208,6 +209,23 @@ MILL_EXPORT size_t unixrecvuntil(unixsock s, void *buf, size_t len,
 MILL_EXPORT void unixclose(unixsock s);
 MILL_EXPORT unixsock unixattach(int fd, int listening);
 MILL_EXPORT int unixdetach(unixsock s);
+
+/******************************************************************************/
+/*  File library                                                              */
+/******************************************************************************/
+
+typedef struct mill_file *mfile;
+MILL_EXPORT mfile fileopen(const char *pathname, int flags, mode_t mode);
+MILL_EXPORT size_t filewrite(mfile f, const void *buf, size_t len, int64_t deadline);
+MILL_EXPORT void fileflush(mfile f, int64_t deadline);
+MILL_EXPORT size_t fileread(mfile f, void *buf, size_t len, int64_t deadline);
+MILL_EXPORT size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t deadline);
+MILL_EXPORT void fileclose(mfile f);
+MILL_EXPORT mfile fileattach(int fd);
+MILL_EXPORT int filedetach(mfile f);
+MILL_EXPORT off_t filetell(mfile f);
+MILL_EXPORT off_t fileseek(mfile f, off_t offset);
+MILL_EXPORT int fileeof(mfile f);
 
 /******************************************************************************/
 /*  Debugging                                                                 */
