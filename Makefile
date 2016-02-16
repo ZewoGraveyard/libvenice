@@ -1,7 +1,7 @@
 TARGET = libvenice
 LIB_NAME = venice
 PKG_NAME = libvenice
-PKG_VERSION = 0.1.1
+PKG_VERSION = 0.2.0
 
 PREFIX ?= /usr/local
 
