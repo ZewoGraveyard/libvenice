@@ -95,7 +95,6 @@ static void mill_tcptune(int s) {
 
 static int mill_tcpreuseport(int s) {
 #ifdef SO_REUSEPORT
-    printf("we have reuseport");
     /*  Allow multiple processes to bind to the same port. */
     int opt = 1;
     return setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &opt, sizeof (opt));
@@ -122,12 +121,8 @@ tcpsock tcplisten(ipaddr addr, int backlog, int reuseport) {
 
     int rc;
 
-    printf("%i\n", reuseport);
-
     if(reuseport) {
-        printf("reuseport\n");
         rc = mill_tcpreuseport(s);
-        printf("rc %i\n", rc);
         if(rc != 0)
             return NULL;
     }
