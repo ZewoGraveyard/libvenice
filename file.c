@@ -44,6 +44,7 @@ struct mill_file {
     size_t olen;
     char ibuf[MILL_FILE_BUFLEN];
     char obuf[MILL_FILE_BUFLEN];
+    int eof;
 };
 
 static void mill_filetune(int fd) {
@@ -75,6 +76,7 @@ mfile fileopen(const char *pathname, int flags, mode_t mode) {
     f->ifirst = 0;
     f->ilen = 0;
     f->olen = 0;
+    f->eof = 0;
     errno = 0;
     return f;
 }
@@ -177,6 +179,7 @@ size_t fileread(mfile f, void *buf, size_t len, int64_t deadline) {
              into the destination buffer. */
             ssize_t sz = read(f->fd, pos, remaining);
             if(!sz) {
+                f->eof = 1;
                 return len - remaining;
             }
             if(sz == -1) {
@@ -190,15 +193,13 @@ size_t fileread(mfile f, void *buf, size_t len, int64_t deadline) {
             }
             pos += sz;
             remaining -= sz;
-            if (sz != 0 && fileeof(f)) {
-                return len - remaining;
-            }
         }
         else {
             /* If we have just a little to read try to read the full connection
              buffer to minimise the number of system calls. */
             ssize_t sz = read(f->fd, f->ibuf, MILL_FILE_BUFLEN);
             if(!sz) {
+                f->eof = 1;
                 return len - remaining;
             }
             if(sz == -1) {
@@ -219,9 +220,6 @@ size_t fileread(mfile f, void *buf, size_t len, int64_t deadline) {
                 f->ilen = sz - remaining;
                 errno = 0;
                 return len;
-            }
-            if (sz != 0 && fileeof(f)) {
-                return len - remaining;
             }
         }
 
@@ -273,6 +271,7 @@ size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t
              into the destination buffer. */
             ssize_t sz = read(f->fd, pos, remaining);
             if(!sz) {
+                f->eof = 1;
                 return received;
             }
             if(sz == -1) {
@@ -287,15 +286,13 @@ size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t
             pos += sz;
             remaining -= sz;
             received += sz;
-            if (sz != 0 && fileeof(f)) {
-                return received;
-            }
         }
         else {
             /* If we have just a little to read try to read the full connection
              buffer to minimise the number of system calls. */
             ssize_t sz = read(f->fd, f->ibuf, MILL_FILE_BUFLEN);
             if(!sz) {
+                f->eof = 1;
                 return received;
             }
             if(sz == -1) {
@@ -324,9 +321,6 @@ size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t
                 f->ilen = 0;
                 errno = 0;
                 return received + (size_t)sz;
-            }
-            if (sz != 0 && fileeof(f)) {
-                return received;
             }
         }
 
@@ -377,18 +371,10 @@ off_t fileseek(mfile f, off_t offset) {
     f->ifirst = 0;
     f->ilen = 0;
     f->olen = 0;
+    f->eof = 0;
     return lseek(f->fd, offset, SEEK_SET);
 }
 
 int fileeof(mfile f) {
-    off_t current = lseek(f->fd, 0, SEEK_CUR);
-    if (current == -1)
-        return -1;
-    off_t end = lseek(f->fd, 0, SEEK_END);
-    if (end == -1)
-        return -1;
-    off_t res = lseek(f->fd, current, SEEK_SET);
-    if (res == -1)
-        return -1;
-    return (current == end);
+    return f->eof;
 }
