@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "libvenice.h"
@@ -45,6 +46,7 @@ struct mill_file {
     char ibuf[MILL_FILE_BUFLEN];
     char obuf[MILL_FILE_BUFLEN];
     int eof;
+    mode_t mode;
 };
 
 static void mill_filetune(int fd) {
@@ -59,10 +61,9 @@ static void mill_filetune(int fd) {
 
 mfile fileopen(const char *pathname, int flags, mode_t mode) {
     /* Open the file. */
-    int fd = open(pathname, flags, mode);
+    int fd = open(pathname, flags | O_NONBLOCK, mode);
     if (fd == -1)
         return NULL;
-    mill_filetune(fd);
 
     /* Create the object. */
     struct mill_file *f = malloc(sizeof(struct mill_file));
@@ -77,6 +78,10 @@ mfile fileopen(const char *pathname, int flags, mode_t mode) {
     f->ilen = 0;
     f->olen = 0;
     f->eof = 0;
+    struct stat sb;
+    if (fstat(f->fd, &sb) == -1)
+        return NULL;
+    f->mode = sb.st_mode;
     errno = 0;
     return f;
 }
@@ -112,6 +117,9 @@ size_t filewrite(mfile f, const void *buf, size_t len, int64_t deadline) {
         if(sz == -1) {
             if(errno != EAGAIN && errno != EWOULDBLOCK)
                 return 0;
+            /* If it's a regular file skip fdwait. */
+            if (S_ISREG(f->mode) || S_ISDIR(f->mode))
+                continue;
             int rc = fdwait(f->fd, FDW_OUT, deadline);
             if(rc == 0) {
                 errno = ETIMEDOUT;
@@ -138,6 +146,9 @@ void fileflush(mfile f, int64_t deadline) {
         if(sz == -1) {
             if(errno != EAGAIN && errno != EWOULDBLOCK)
                 return;
+            /* If it's a regular file skip fdwait. */
+            if (S_ISREG(f->mode) || S_ISDIR(f->mode))
+                continue;
             int rc = fdwait(f->fd, FDW_OUT, deadline);
             if(rc == 0) {
                 errno = ETIMEDOUT;
@@ -222,7 +233,9 @@ size_t fileread(mfile f, void *buf, size_t len, int64_t deadline) {
                 return len;
             }
         }
-
+        /* If it's a regular file skip fdwait. */
+        if (S_ISREG(f->mode) || S_ISDIR(f->mode))
+            continue;
         /* Wait till there's more data to read. */
         int res = fdwait(f->fd, FDW_IN, deadline);
         if (!res) {
@@ -323,7 +336,9 @@ size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t
                 return received + (size_t)sz;
             }
         }
-
+        /* If it's a regular file skip fdwait. */
+        if (S_ISREG(f->mode) || S_ISDIR(f->mode))
+            continue;
         /* Wait till there's more data to read. */
         int res = fdwait(f->fd, FDW_IN, deadline);
         if(!res) {
