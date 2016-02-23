@@ -9,24 +9,27 @@ libvenice
 
 ## Installation
 
-### Homebrew 
+### OS X
+
 ```bash
-$ brew tap zewo/tap
-$ brew install libvenice
+brew tap zewo/tap
+brew install libvenice
 ```
 
-### Ubuntu/Debian
+### Linux
+
 ```bash
-$ echo "deb [trusted=yes] http://apt.zewo.io/deb ./" | sudo tee --append /etc/apt/sources.list
-$ sudo apt-get update
-$ sudo apt-get install libvenice
+echo "deb [trusted=yes] http://apt.zewo.io/deb ./" | sudo tee --append /etc/apt/sources.list
+sudo apt-get update
+sudo apt-get install libvenice
 ```
 
 ### Source
+
 ```bash
-$ git clone https://github.com/Zewo/libvenice.git && cd libvenice
-$ make
-$ (sudo) make install
+git clone https://github.com/Zewo/libvenice.git && cd libvenice
+make
+sudo make install
 ```
 
 ## Community
