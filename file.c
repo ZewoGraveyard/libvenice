@@ -206,7 +206,7 @@ size_t fileread(mfile f, void *buf, size_t len, int64_t deadline) {
             remaining -= sz;
         }
         else {
-            /* If we have just a little to read try to read the full connection
+            /* If we have just a little to read try to read the full file
              buffer to minimise the number of system calls. */
             ssize_t sz = read(f->fd, f->ibuf, MILL_FILE_BUFLEN);
             if(!sz) {
@@ -301,7 +301,7 @@ size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t
             received += sz;
         }
         else {
-            /* If we have just a little to read try to read the full connection
+            /* If we have just a little to read try to read the full file
              buffer to minimise the number of system calls. */
             ssize_t sz = read(f->fd, f->ibuf, MILL_FILE_BUFLEN);
             if(!sz) {
