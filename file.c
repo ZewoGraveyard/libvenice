@@ -390,6 +390,17 @@ off_t fileseek(mfile f, off_t offset) {
     return lseek(f->fd, offset, SEEK_SET);
 }
 
+off_t filesize(mfile f) {
+    /* pipe or FIFO special files does not support lseek */
+    if (!S_ISREG(f->mode))
+        return -1;
+        
+    off_t pos = lseek(f->fd, (size_t)0, SEEK_CUR);
+    size_t size = lseek(f->fd, (size_t)0, SEEK_END);
+    lseek(f->fd, pos, SEEK_SET);
+    return size + f->olen;
+}
+
 int fileeof(mfile f) {
     return f->eof;
 }
