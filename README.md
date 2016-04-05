@@ -5,7 +5,7 @@ libvenice
 [![License MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat)](https://tldrlegal.com/license/mit-license)
 [![Slack Status](https://zewo-slackin.herokuapp.com/badge.svg)](https://zewo-slackin.herokuapp.com)
 
-**libvenice** is a CSP framework.
+**libvenice** is a CSP framework. It is a fork of [libmill](http://libmill.org).
 
 ## Installation
 
