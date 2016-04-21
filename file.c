@@ -206,7 +206,7 @@ size_t fileread(mfile f, void *buf, size_t len, int64_t deadline) {
             remaining -= sz;
         }
         else {
-            /* If we have just a little to read try to read the full connection
+            /* If we have just a little to read try to read the full file
              buffer to minimise the number of system calls. */
             ssize_t sz = read(f->fd, f->ibuf, MILL_FILE_BUFLEN);
             if(!sz) {
@@ -301,7 +301,7 @@ size_t filereadlh(mfile f, void *buf, size_t lowwater, size_t highwater, int64_t
             received += sz;
         }
         else {
-            /* If we have just a little to read try to read the full connection
+            /* If we have just a little to read try to read the full file
              buffer to minimise the number of system calls. */
             ssize_t sz = read(f->fd, f->ibuf, MILL_FILE_BUFLEN);
             if(!sz) {
@@ -388,6 +388,17 @@ off_t fileseek(mfile f, off_t offset) {
     f->olen = 0;
     f->eof = 0;
     return lseek(f->fd, offset, SEEK_SET);
+}
+
+off_t filesize(mfile f) {
+    /* pipe or FIFO special files does not support lseek */
+    if (!S_ISREG(f->mode))
+        return -1;
+        
+    off_t pos = lseek(f->fd, (size_t)0, SEEK_CUR);
+    size_t size = lseek(f->fd, (size_t)0, SEEK_END);
+    lseek(f->fd, pos, SEEK_SET);
+    return size + f->olen;
 }
 
 int fileeof(mfile f) {
